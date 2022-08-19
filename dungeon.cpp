@@ -3,17 +3,11 @@
 #define ll long long
 using namespace std;
 
-
-/*
-based on where right now u decide if going up or down or fwd
-room to room recalling of function
-room sizes: 3x4 5x5 6x3 3x3 4x3
-total board of 64x24
-*/
-
 const int MAX_X = 64;
 const int MAX_Y = 48;
 const int MIN_Y = -1;
+unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+mt19937 generator (seed);
 
 struct point{
     int x;
@@ -69,7 +63,7 @@ class room{
         end.x = start.x + length;
         end.y = start.y;
 
-        int dir_decider = rand()%3 + 1;
+        int dir_decider = generator()%3 + 1;
         switch(dir_decider){
             case 3:
                 curr_pos.dir = 3;
@@ -109,7 +103,7 @@ void color_grid(vector<vector<int>> &grid, room room_inp){
 }
 
 void corridors(vector<vector<int>> &grid, point &curr_pos){
-    int corr_width = 2 + rand()%3;
+    int corr_width = 2 + generator()%3;
     if(curr_pos.x < MAX_X){
         if(curr_pos.dir == 2){
             for(int i{curr_pos.y}; i < min(MAX_Y, corr_width + curr_pos.y); i++){
@@ -127,7 +121,7 @@ void corridors(vector<vector<int>> &grid, point &curr_pos){
     }
     curr_pos.dir = 1;
     
-    int corr_length = 3 + rand()%4;
+    int corr_length = 3 + generator()%4;
     if(curr_pos.y < MAX_Y && curr_pos.y > MIN_Y){    
         for(int i{curr_pos.x}; i < min(MAX_X, corr_length + curr_pos.x); i++){
             grid[i][curr_pos.y] = 1;
@@ -147,7 +141,7 @@ int main(){
     vector<room> room_list;
     
     while(curr_pos.x < MAX_X && curr_pos.y < MAX_Y && curr_pos.y > MIN_Y){
-        int switch_case = rand()%5;
+        int switch_case = generator()%5;
         room curr_room(switch_case, curr_pos);
     
         color_grid(grid, curr_room);
