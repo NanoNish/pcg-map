@@ -12,11 +12,14 @@ total board of 64x24
 */
 
 const int MAX_X = 64;
-const int MAX_Y = 24;
+const int MAX_Y = 48;
+const int MIN_Y = -1;
 
 struct point{
     int x;
     int y;
+    int dir{0};
+    //Direction is 1 if facing +x, 2 if +y, 3 if -y, 0 if no dir
 };
 
 class room{
@@ -32,6 +35,7 @@ class room{
         end.x = start.x + length;
         end.y = start.y;
         curr_pos = end;
+        curr_pos.dir = 1;
     }
 
     room(int switch_case, point &curr_pos){
@@ -41,7 +45,7 @@ class room{
                 width = 3;
                 break;
             case 1:
-                length = 4;
+                length = 5;
                 width = 3;
                 break;
             case 2:
@@ -53,7 +57,7 @@ class room{
                 width = 5;
                 break;
             case 4:
-                length = 6;
+                length = 7;
                 width = 3;
                 break;
             default:
@@ -64,7 +68,28 @@ class room{
         start = curr_pos;
         end.x = start.x + length;
         end.y = start.y;
-        curr_pos = end;
+
+        int dir_decider = rand()%3 + 1;
+        switch(dir_decider){
+            case 3:
+                curr_pos.dir = 3;
+                curr_pos.x = (start.x + end.x)/2;
+                curr_pos.y = start.y - (width+2)/2;
+                break;
+            case 2:
+                curr_pos.dir = 2;
+                curr_pos.x = (start.x + end.x)/2;
+                curr_pos.y = start.y + (width+2)/2;
+                break;
+            case 1:
+                curr_pos = end;
+                curr_pos.dir = 1;
+                break;
+            default:
+                curr_pos = end;
+                curr_pos.dir = 1;
+                break;
+        }
     }
 
     room(){
@@ -77,18 +102,38 @@ class room{
 
 void color_grid(vector<vector<int>> &grid, room room_inp){
     for(int i{room_inp.start.x}; i < min(MAX_X, room_inp.end.x); i++){
-        for(int j{room_inp.start.y - room_inp.width/2}; j <= min(23, room_inp.start.y + room_inp.width/2); j++){
+        for(int j{room_inp.start.y - room_inp.width/2}; j <= min(MAX_Y-1, room_inp.start.y + room_inp.width/2); j++){
             grid[i][j] = 1;
         }
     }
 }
 
 void corridors(vector<vector<int>> &grid, point &curr_pos){
-    int corr_length = 3 + rand()%4;
-    for(int i{curr_pos.x}; i < min(MAX_X, corr_length + curr_pos.x); i++){
-        grid[i][curr_pos.y] = 1;
+    int corr_width = 2 + rand()%3;
+    if(curr_pos.x < MAX_X){
+        if(curr_pos.dir == 2){
+            for(int i{curr_pos.y}; i < min(MAX_Y, corr_width + curr_pos.y); i++){
+                grid[curr_pos.x][i] = 1;
+            }
+            curr_pos.y = corr_width + curr_pos.y;
+        }
+
+        if(curr_pos.dir == 3){
+            for(int i{curr_pos.y}; i > max(MIN_Y, curr_pos.y - corr_width); i--){
+                grid[curr_pos.x][i] = 1;
+            }
+            curr_pos.y = curr_pos.y - corr_width;
+        }
     }
-    curr_pos.x = corr_length + curr_pos.x;
+    curr_pos.dir = 1;
+    
+    int corr_length = 3 + rand()%4;
+    if(curr_pos.y < MAX_Y && curr_pos.y > MIN_Y){    
+        for(int i{curr_pos.x}; i < min(MAX_X, corr_length + curr_pos.x); i++){
+            grid[i][curr_pos.y] = 1;
+        }
+        curr_pos.x = corr_length + curr_pos.x;
+    }
 }  
 
 int main(){
@@ -97,10 +142,11 @@ int main(){
     vector<vector<int>> grid(MAX_X, tmp_vec);
     point curr_pos;
     curr_pos.x = 0;
-    curr_pos.y = 5;
+    curr_pos.y = 12;
+    curr_pos.dir = 1;
     vector<room> room_list;
     
-    while(curr_pos.x < MAX_X && curr_pos.y < MAX_Y){
+    while(curr_pos.x < MAX_X && curr_pos.y < MAX_Y && curr_pos.y > MIN_Y){
         int switch_case = rand()%5;
         room curr_room(switch_case, curr_pos);
     
