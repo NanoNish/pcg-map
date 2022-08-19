@@ -147,8 +147,6 @@ int main(){
         color_grid(grid, curr_room);
         corridors(grid, curr_pos);
     
-        cout << curr_room.length << " " << curr_room.width << " " << curr_room.start.x << " " << curr_room.start.y << " " << curr_room.end.x << " " << curr_room.end.y << endl;
-    
         room_list.push_back(curr_room); 
     }
     
@@ -158,6 +156,8 @@ int main(){
         }
         cout << endl;
     }
+
+    cout << endl;
     
     for(auto &i: grid){
         for(auto &j: i){
@@ -166,6 +166,4 @@ int main(){
         }
         cout << endl;
     }
-
-    cout << endl;
 }
